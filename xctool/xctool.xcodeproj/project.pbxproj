@@ -1104,6 +1104,7 @@
 		283CCA5116C2EA3800F2E343 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "xctool/xctool-Prefix.pch";
 				PRODUCT_NAME = xctool;
@@ -1113,6 +1114,7 @@
 		283CCA5216C2EA3800F2E343 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "xctool/xctool-Prefix.pch";
 				PRODUCT_NAME = xctool;
@@ -1123,6 +1125,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 287E0DC417CD60B00088A264 /* xctool-tests.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
@@ -1140,6 +1143,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 287E0DC417CD60B00088A264 /* xctool-tests.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
