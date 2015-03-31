@@ -23,6 +23,7 @@
 #import "SimDeviceSet.h"
 #import "SimDeviceType.h"
 #import "SimRuntime.h"
+#import "XCToolUtil.h"
 
 @implementation SimulatorWrapperXcode6
 
@@ -64,36 +65,31 @@
     }
     return NO;
   }
-  
-  if ([simInfo simulatedDevice].state == SimDeviceStateBooted) {
-    return YES;
+
+  NSURL *iOSSimulatorURL = [NSURL fileURLWithPath:[NSString pathWithComponents:@[XcodeDeveloperDirPath(), @"Applications/iOS Simulator.app"]]];
+  NSDictionary *configuration = @{NSWorkspaceLaunchConfigurationArguments: @[@"-CurrentDeviceUDID", [[[simInfo simulatedDevice] UDID] UUIDString]]};
+  NSError *launchError = nil;
+  NSRunningApplication *app = [[NSWorkspace sharedWorkspace] launchApplicationAtURL:iOSSimulatorURL
+                                                                            options:NSWorkspaceLaunchDefault
+                                                                      configuration:configuration
+                                                                              error:&launchError];
+  if (!app) {
+    NSString *errorDesc = [NSString stringWithFormat: @"iOS Simulator app wasn't launched at path \"%@\" with configuration: %@. Error: %@", [iOSSimulatorURL path], configuration, launchError];
+    if (error) {
+      *error = [NSError errorWithDomain:@"com.apple.iOSSimulator"
+                                   code:0
+                               userInfo:@{NSLocalizedDescriptionKey: errorDesc}];
+    }
+    return NO;
   }
 
-  DTiPhoneSimulatorApplicationSpecifier *appSpec = [DTiPhoneSimulatorApplicationSpecifier specifierWithApplicationBundleIdentifier:@"com.apple.unknown"];
-  DTiPhoneSimulatorSystemRoot *systemRoot = [simInfo systemRootForSimulatedSdk];
-
-  DTiPhoneSimulatorSessionConfig *sessionConfig = [[[DTiPhoneSimulatorSessionConfig alloc] init] autorelease];
-  [sessionConfig setApplicationToSimulateOnStart:appSpec];
-  [sessionConfig setDevice:[simInfo simulatedDevice]];
-  [sessionConfig setRuntime:[simInfo simulatedRuntime]];
-  [sessionConfig setSimulatedApplicationLaunchArgs:@[]];
-  [sessionConfig setSimulatedApplicationLaunchEnvironment:@{}];
-  [sessionConfig setSimulatedApplicationShouldWaitForDebugger:NO];
-  [sessionConfig setSimulatedArchitecture:[simInfo simulatedArchitecture]];
-  [sessionConfig setSimulatedDeviceFamily:[simInfo simulatedDeviceFamily]];
-  [sessionConfig setSimulatedDeviceInfoName:[simInfo simulatedDeviceInfoName]];
-  [sessionConfig setSimulatedSystemRoot:systemRoot];
-
-  SimulatorLauncher *launcher = [[[SimulatorLauncher alloc] initWithSessionConfig:sessionConfig
-                                                                       deviceName:[simInfo simulatedDeviceInfoName]] autorelease];
-  launcher.launchTimeout = [simInfo launchTimeout];
-
-  BOOL simStartedSuccessfully = [launcher launchAndWaitForStart] || [simInfo simulatedDevice].state == SimDeviceStateBooted;
-  if (!simStartedSuccessfully && error) {
-    *error = launcher.launchError;
+  int attempts = 30;
+  while ([[simInfo simulatedDevice] state] != SimDeviceStateBooted && attempts > 0) {
+    [NSThread sleepForTimeInterval:0.1];
+    --attempts;
   }
-  
-  return simStartedSuccessfully;
+ 
+  return attempts > 0;
 }
 
 #pragma mark -
